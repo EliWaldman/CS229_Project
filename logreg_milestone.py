@@ -10,117 +10,51 @@ import seaborn as sns
 # Load your dataset (replace 'your_dataset.csv' with your actual dataset file)
 df = pd.read_pickle('next_wave_admission_prediction.pkl')
 
-# List of columns to convert to numeric values
+# these r cols of interest from the pdf (found by hand, all are present in our next_wave_admission_prediction.pkl)
+cols_of_interest = [
+    "rabyear", "ragender", "raracem", "rahispan", "rcenreg", "rurbrur", "raedyrs", "raedegrm", 
+    "raeduc", "rameduc", "rafeduc", "rmstat", "rmcurln", "rarelig", "ravetrn", "rabplace", 
+    "rshlt", "rhltc3", "rhosp", "rnrshom", "rdoctor", "rhomcar", "rdrugs", "routpt", 
+    "rdentst", "rspcfac", "roopmd", "roopmdo", "rdepres", "reffort", "rsleepr", "rwhappy", "rflone", 
+    "rfsad", "rfsad", "rgoing", "rhibp", "rdiab", "rcancr", "rlung", "rheart", "rstrok", "rpsych", 
+    "rarthr", "rsleep", "rmemry", "rmemrye2", "ralzhee2", "rdemene2", "rbmi", "rweight", "rdrink", 
+    "rcholst", "rflusht", "rbreast", "rmammog", "rprost", "rsmokev", "rnsscre", 
+    "rslfmem", "rpstmem", "rser7", "rbwc20", "rdy", "rmo", "ryr", "rwalkra", 
+    "rdressa", "rbatha", "reata", "rtoilta", "rbeda", "hatotb", "hahous", "hadebt", "hachck", "rhigov", 
+    "rmrprem", "rhiothp", "rlifein", "rpnhm5y"
+    ]
+
+# these r the cols that have greater than 50% of their values filled in (ie not nan)
 columns_to_convert = [
-    'sagey_b', 'seduc', 'swork', 'sfsize', 'sfinr', 
-    'shltc5', 'sshlt', 'shosp', 'sdeprex', 'slifein'
+    "ragender", "raedegrm", "rfsad", "rabyear", "raeduc", "rabplace", "ravetrn", "rahispan", 
+    "raracem", "raedyrs", "rarelig", "rameduc", "rafeduc", "hatotb", "hahous", "hadebt", 
+    "hachck", "rdrink", "rshlt", "rcenreg", "rstrok", "rheart", "rlung", "rcancr", "rmstat", 
+    "rdiab", "rpsych", "rhibp", "rarthr", "rwalkra", "rdressa", "reata", "rbatha", "rbeda", 
+    "roopmd", "rdrugs"
 ]
 
-# bigger feature set, not using for now
-"""
-social_determinants = [
-    # Income & Pensions
-    "riearn", "ripena", "ripen", "riann", "rissdi", "risret", "riunwc", "rigxfr", "risdi", 
-    "riunem", "riwcmp", "rissi", "rifsdi", "rifunem", "rifwcmp", "rifssi", "rifearn", 
-    "rifpena", "rifpen", "rifann", "rifssdi", "rifsret", "rifunwc", "rifgxfr",
 
-    # Public Assistance & Benefits
-    "rassrecv", "rssdi", "rssiapp", "rssiden", "rssiapl", "rssirec", "rssistp", "rssappy", 
-    "rssaply", "rssrecy", "rssstpy", "rssappm", "rssaplm", "rssrecm", "rssstpm",
-
-    # Retirement & Work History
-    "rwork", "rwork62", "rwork65", "rworklm", "rrplnyr", "rrplnya", "rretemp", "rsamemp", 
-    "rsamejob", "rwork70", "rwork70a", "rwork70f", "rwork70af",
-
-    # Poverty & Household Financial Struggles
-    "hpovthr", "hpovfam", "hpovhhi", "hinpov", "hinpovr", "hinpovd", "hinpovrd",
-
-    # Healthcare Utilization & Costs
-    "rdoctor", "rhomcar", "rhsptim", "rnrstim", "rhspnit", "rnrsnit", "rdoctim", "rnhmliv", 
-    "rhlthlm", "rshltc", "rshltcf", "rhiltc", "rltcprm",
-
-    # Insurance Coverage
-    "rcovr", "rcovs", "rhigov", "rgovmr", "rgovmd", "rgovva", "rgovot", "rhiothp", 
-    "rhesrc1", "rhesrc2", "rhecov1", "rhecov2", "rhecov3",
-
-    # Health Conditions & Chronic Illnesses
-    "rhibps", "rdiabs", "rcancrs", "rlungs", "rhearts", "rstroks", "rpsychs", "rarthrs", 
-    "rcondsf", "rcondsp", "rconds",
-
-    # Cognitive & Mental Health
-    "rdepres", "reffort", "rsleepr", "rwhappy", "rflone", "renlife", "rfsad", "rcesd", 
-    "rmemryq", "rmemry", "rmemrye", "rmemrye2", "rnotics", "rprchmem", "rpnhm5y",
-
-    # Preventive Care & Health Screenings
-    "rflusht", "rcholst", "rbreast", "rmammog", "rpapsm", "rprost", "rdrinkd", "rdrinkn",
-
-    # Living Arrangements & Family Support
-    "rdadliv", "rmomliv", "rlivpar", "rdadage", "rmomage", "rlivsib", "rlivbro", "rlivsis", 
-    "raevbrn", "raevbrnf",
-
-    # Loneliness & Social Networks
-    "rflone", "rlblonely3", "rlblonely11",
-
-    # Perceived Support & Well-being
-    "rlbsatwlf", "rlbsatfam", "rlbsathlth", "rlbsatlife", "rlbsathome",
-
-    # Housing & Residential Stability
-    "hhhresp", "hcpl", "hanyfin", "hanyfam", "haoahdhh", "hohrshh", "hnhmliv", "hahous", 
-    "hamort", "hahmln", "hafhous", "hatoth", "hatotn", "hatotf", "hatotb", "hatotw", 
-    "hanethb", "hafira", "hafmort", "hafhmln"
-]
-"""
-
+# cols from cols_of_interest that have more than 50% values filled in
 for col in columns_to_convert:
-    #print(f"Processing column: {col}")
+    # print(f"Processing column: {col}")
 
     # Extract numbers before '.' and convert to numeric, ignoring NaNs for now
     df[col] = df[col].astype(str).str.extract(r'(\d+)')[0].astype(float)
 
+    # CLEANING METHOD 1: replace all nan values with the mean of that column (test accuracy = 0.8482)
     # Replace NaNs with the mean of the column
-    mean_value = df[col].mean()
-    df[col].fillna(mean_value, inplace=True)
+    # mean_value = df[col].mean()
+    # df[col].fillna(mean_value, inplace=True)
+
+    # CLEANING METHOD 2: drop all rows that have nan (test accuracy = 0.7420)
+    df = df.dropna(subset=[col])  # 
 
     #print(f"Sample cleaned data for {col}:")
     #print(df[col].sample(20).reset_index(drop=True))
     #print("\n")
 
 print(df.shape)
-print("shape^^^^^^")
-
-# ------------
-"""
-# clean the data, drop any rows that have NaN within our subset of features
-def clean_column(col):
-    return col.dropna().apply(lambda x: int(str(x).split('.')[0]) if isinstance(x, str) and '.' in x else x).astype(float)
-
-# Apply cleaning only to specified columns
-df_cleaned = df.copy()
-df_cleaned[columns_to_convert] = df_cleaned[columns_to_convert].apply(clean_column)
-
-# Drop rows where **any** of the `columns_to_convert` contain NaNs
-df_cleaned = df_cleaned.dropna(subset=columns_to_convert)
-"""
-# ------------
-
-
-
-"""
-# Function to extract numeric values before any non-numeric characters
-def extract_numeric(value):
-    # Ensure we handle cases like '12352.' or '1.male' by extracting the numeric part before any non-numeric character
-    if isinstance(value, str):
-        return ''.join(filter(str.isdigit, value.split('.')[0]))
-    return str(value).split('.')[0]
-
-# Convert selected columns to numeric by applying the extraction function
-for col in columns_to_convert:
-    df[col] = df[col].apply(extract_numeric).astype(float)
-
-# THIS IS COMMENTED OUT BC IT REMOVES ALL BUT 6 ROWS
-# Handle any missing values (NaN) that result from coercion or missing data
-# df = df.dropna(subset=columns_to_convert)
-"""
+print("------shape------")
 
 
 
