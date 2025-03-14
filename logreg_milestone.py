@@ -38,59 +38,50 @@ columns_to_convert = [
 for col in columns_to_convert:
     # print(f"Processing column: {col}")
 
-    # Extract numbers before '.' and convert to numeric, ignoring NaNs for now
+    # extract numbers before '.' and convert to numeric, ignoring NaNs for now
     df[col] = df[col].astype(str).str.extract(r'(\d+)')[0].astype(float)
 
-    # CLEANING METHOD 1: replace all nan values with the mean of that column (test accuracy = 0.8482)
-    # Replace NaNs with the mean of the column
-    # mean_value = df[col].mean()
-    # df[col].fillna(mean_value, inplace=True)
+    # CLEANING METHOD: drop all rows that have nan (test accuracy = 0.7420)
+    df = df.dropna(subset=[col])  
 
-    # CLEANING METHOD 2: drop all rows that have nan (test accuracy = 0.7420)
-    df = df.dropna(subset=[col])  # 
-
-    #print(f"Sample cleaned data for {col}:")
-    #print(df[col].sample(20).reset_index(drop=True))
-    #print("\n")
 
 print(df.shape)
 print("------shape------")
 
 
-
-# Define the target variable (assuming 'target' is the name of the target column)
+# define the target variable (assuming 'target' is the name of the target column)
 X = df[columns_to_convert] 
 y = df['will_admit_next']  # Replace with your actual target column name 
 
-# Split the dataset into train, validation, and test sets (70% train, 15% val, 15% test)
+# split the dataset into train, validation, and test sets (70% train, 15% val, 15% test)
 X_train, X_temp, y_train, y_temp = train_test_split(X, y, test_size=0.3, random_state=42)
 X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
 
-# Initialize the logistic regression model
+# initialize logistic regression 
 log_reg_model = LogisticRegression()
 
-# Fit the model to the training data
+# fit to training data
 log_reg_model.fit(X_train, y_train)
 
-# Predict on the validation set
+# predict on val set
 y_val_pred = log_reg_model.predict(X_val)
 
-# Evaluate the model on the validation set
+# evaluate the model on the validation set
 val_accuracy = accuracy_score(y_val, y_val_pred)
 print(f'Validation Accuracy: {val_accuracy:.4f}')
 print('Classification Report (Validation):')
 print(classification_report(y_val, y_val_pred))
 
-# Predict on the test set
+# predict on the test set
 y_test_pred = log_reg_model.predict(X_test)
 
-# Evaluate the model on the test set
+# evaluate the model on the test set
 test_accuracy = accuracy_score(y_test, y_test_pred)
 print(f'Test Accuracy: {test_accuracy:.4f}')
 print('Classification Report (Test):')
 print(classification_report(y_test, y_test_pred))
 
-# Print the feature importance based on logistic regression coefficients
+# print the feature importance based on logistic regression coefficients
 coef = log_reg_model.coef_[0]
 feature_importance = pd.DataFrame({
     'Feature': columns_to_convert,
@@ -98,7 +89,7 @@ feature_importance = pd.DataFrame({
     'Absolute Coefficient': abs(coef)
 })
 
-# Sort by the absolute coefficient value to identify the most influential features
+# sort by the absolute coefficient value to identify the most influential features
 feature_importance_sorted = feature_importance.sort_values(by='Absolute Coefficient', ascending=False)
 
 print('\nFeature Importance (Sorted by Absolute Coefficient):')
